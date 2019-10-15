@@ -13,15 +13,15 @@ Info 3 implies that the category of processes allowed to execute is also a criti
 
 Therefore, I designed three *semaphores* in this problem, namingly `time`, `process` and `type`. The amount of `time` and type is set to 1 according to the situation as illustrated above, and the amount of `process` is determined by the situation. In this problem, it is 5. The mapping of variables in the description and my program can be listed as follows:
 
-|in Problem Description|&nbsp;&nbsp;&nbsp;&nbsp;|in My Program|
-|:--------:|:-:|:--------:|
-|pig||process|
-|rope||processor|
-|function `pig`||the whole program|
-|enum `Destination`||enum `ProcessType`|
-|`WaitUntilSafeToCross()`||all `acquire...` functions related to semaphore|
-|`CrossRavine()`||`NextJiffle()`|
-|`DoneWithCrossing()`||all `release...` functions related to semaphore|
+|in Problem Description|in My Program|
+|:--------------------:|:-----------:|
+|pig|process|
+|rope|processor|
+|function `pig`|the whole program|
+|enum `Destination`|enum `ProcessType`|
+|`WaitUntilSafeToCross()`|all `acquire...` functions related to semaphore|
+|`CrossRavine()`|`NextJiffle()`|
+|`DoneWithCrossing()`|all `release...` functions related to semaphore|
 
 The `acquire...` and `release...` functions mentioned here are my implementations of `wait()` and `signal()`. I do not use multithreading to *emulate* the process; rather, I *simulate* with virtual time ticks.
 
@@ -38,6 +38,15 @@ typedef struct ResourceSemaphoreEntity {
 
 Where `maximumCount`, `currentCount` and `minAllocCount` are necessary properties of a semaphore. Semaphore manipulations are written as sepatared functions prefixed with `acquire`, `release` and so on.
 
-The program automatically generates jobs with `random` function and any desired seed to simulate all possible situations. The output will show the current "running pigs" like this:
+The program automatically generates jobs with `rand()` function and any desired seed to simulate all possible situations. The output will show the current "running pigs" like this:
 
 ![](example-output.png)
+
+Changeable parameters:
+
+|Name|Usage|Location|
+|:--:|:---:|:------:|
+|`seed`|seed for rand()|main.cpp|
+|`yieldingTicks`|in how many ticks should processes be generated|main.cpp|
+|`execTime`|how long will a process execute|ProcessEmulation.cpp|
+|`resProcess->maximumCount`|maximum processes that can be executed together|ProcessEmulation.cpp|
