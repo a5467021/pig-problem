@@ -3,10 +3,10 @@ An interesting problem of Operating System on process scheduling. As homework.
 
 The problem is described as:
 
-> Some pigs are trying to cross a ravine. A single rope traverses the ravine, and pigs can cross hand-over-hand. Up to five pigs can be hanging on the rope at any one time. if there are more than five, then the rope will break and they will all die. Also, if eastward-moving pigs encounter westward moving pigs, all will fall off and die.
-
+> Some pigs are trying to cross a ravine. A single rope traverses the ravine, and pigs can cross hand-over-hand. Up to five pigs can be hanging on the rope at any one time. if there are more than five, then the rope will break and they will all die. Also, if eastward-moving pigs encounter westward moving pigs, all will fall off and die.  
+> 
 > Each pig operates in a separate thread, which executes the code below:
-
+>
 > ```C
 > typedef enum {EAST, WEST} Destination ;
 > 
