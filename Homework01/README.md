@@ -25,6 +25,8 @@ Therefore, I designed three *semaphores* in this problem, namingly `time`, `proc
 
 The `acquire...` and `release...` functions mentioned here are my implementations of `wait()` and `signal()`. I do not use multithreading to *emulate* the process; rather, I *simulate* with virtual time ticks.
 
+In order to achieve maximum throughput, process launching policy is set to "lauch any program if it is available". To implement this, I employed a simple list, adding all launching requests to it, iterating over the list in every time tick and launch all available programs.
+
 My definition of a semaphore is a C struct:
 
 ```C
