@@ -20,18 +20,18 @@ const ResourceSemaphore resTime = (ResourceSemaphore)malloc(sizeof(ResourceSemap
 void initResources()
 {
 	resProcess->maximumCount = 5;
-	resProcess->currentCount = 5;
+	resProcess->currentCount = resProcess->maximumCount;
 	resProcess->minAllocCount = 1;
 	resProcess->paramCount = 0;
 	resProcess->exrtaParams = NULL;
 	resType->maximumCount = 1;
-	resType->currentCount = 1;
+	resType->currentCount = resType->maximumCount;
 	resType->minAllocCount = 1;
 	resType->paramCount = 1;
 	resType->exrtaParams = (int*)malloc(sizeof(int) * resType->paramCount);
 	resType->exrtaParams[0] = -1;
 	resTime->maximumCount = 1;
-	resTime->currentCount = 1;
+	resTime->currentCount = resTime->maximumCount;
 	resTime->minAllocCount = 1;
 	resTime->paramCount = 0;
 }
