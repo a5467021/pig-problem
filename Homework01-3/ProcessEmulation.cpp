@@ -14,7 +14,8 @@ const int ERR_NO_JOBS = 2;
 const int execTime = 6;
 static int pidCount = 0;
 const ResourceSemaphore resProcess = (ResourceSemaphore)malloc(sizeof(ResourceSemaphoreEntity));
-const ResourceSemaphore resTime = (ResourceSemaphore)malloc(sizeof(ResourceSemaphoreEntity));
+const ResourceSemaphore resTimeTyp1 = (ResourceSemaphore)malloc(sizeof(ResourceSemaphoreEntity));
+const ResourceSemaphore resTimeTyp2 = (ResourceSemaphore)malloc(sizeof(ResourceSemaphoreEntity));
 
 void initResources()
 {
@@ -23,11 +24,16 @@ void initResources()
 	resProcess->minAllocCount = 1;
 	resProcess->paramCount = 0;
 	resProcess->exrtaParams = NULL;
-	resTime->maximumCount = 1;
-	resTime->currentCount = resTime->maximumCount;
-	resTime->minAllocCount = 1;
-	resTime->paramCount = 0;
-	resTime->exrtaParams = NULL;
+	resTimeTyp1->maximumCount = 1;
+	resTimeTyp1->currentCount = resTimeTyp1->maximumCount;
+	resTimeTyp1->minAllocCount = 1;
+	resTimeTyp1->paramCount = 0;
+	resTimeTyp1->exrtaParams = NULL;
+	resTimeTyp2->maximumCount = 1;
+	resTimeTyp2->currentCount = resTimeTyp2->maximumCount;
+	resTimeTyp2->minAllocCount = 1;
+	resTimeTyp2->paramCount = 0;
+	resTimeTyp2->exrtaParams = NULL;
 }
 
 int genPid()
@@ -108,12 +114,14 @@ Process randomRequest()
 
 int nextJiffle(vector<Process> &procs)
 {
-	resetTime(resTime);
+	resetTime(resTimeTyp1);
+	resetTime(resTimeTyp2);
 	int finishedJobs = 0;
 
 	// collecting data for visualization
-	vector<Process> statusBar;
-	for(int a = 0; a < execTime; ++a) statusBar.push_back(NULL);
+	vector<Process> statusTyp1, statusTyp2;
+	for(int a = 0; a < execTime; ++a)
+		statusTyp1.push_back(NULL), statusTyp2.push_back(NULL);
 
 	for(vector<Process>::iterator it = procs.begin(); it != procs.end(); it++)
 	{
@@ -123,28 +131,43 @@ int nextJiffle(vector<Process> &procs)
 				(*it)->status = ready;
 				break;
 			case ready:
-				if(acquireTime(resTime, 1) == SUCCESS)
+				if((*it)->type == typ1)
 				{
-					if(acquireThread(resProcess, 1) == SUCCESS)
+					if(acquireTime(resTimeTyp1, 1) == SUCCESS)
 					{
-						(*it)->status = executing;
+						if(acquireThread(resProcess, 1) == SUCCESS)
+							(*it)->status = executing;
+						else
+						{
+							releaseTime(resTimeTyp1, 1);
+							break;
+						}
+					}
+					else break;
+				}
+				else if((*it)->type == typ2)
+				{
+					if(acquireTime(resTimeTyp2, 1) == SUCCESS)
+					{
+						if(acquireThread(resProcess, 1) == SUCCESS)
+							(*it)->status = executing;
+						else
+						{
+							releaseTime(resTimeTyp2, 1);
+							break;
+						}
+					}
+					else break;
+				}
 #ifdef LOGGING
 						cout << "[LAUNCH] " << describeProcess(*it) << " launched" << endl;
 #endif
-					}
-					else
-					{
-						releaseTime(resTime, 1);
-						break;
-					}
-				}
-				else break;
 			case executing:
 				// collecting data for visualization
 				if((*it)->type == typ1)
-					statusBar[execTime - (*it)->remainingTime] = *it;
+					statusTyp1[execTime - (*it)->remainingTime] = *it;
 				else
-					statusBar[(*it)->remainingTime - 1] = *it;
+					statusTyp2[(*it)->remainingTime - 1] = *it;
 
 				(*it)->remainingTime -= 1;
 
@@ -163,8 +186,9 @@ int nextJiffle(vector<Process> &procs)
 	releaseThread(resProcess, finishedJobs);
 
 	// visualization
-	for(vector<Process>::iterator it = statusBar.begin(); it != statusBar.end(); ++it)
-		cout << animateProcess(*it);
+	for(vector<Process>::iterator it1 = statusTyp1.begin(), it2 = statusTyp2.begin();
+		it1 != statusTyp1.end(); ++it1, ++it2)
+		cout << animateProcesses(*it1, *it2);
 	cout << endl;
 
 	// garbage collecting
@@ -200,11 +224,27 @@ string animateProcess(Process p)
 
 	strout << '[';
 	if(p == NULL)
-		strout << setw(6) << "";
+		strout << setw(7) << "";
 	else if(p->type == typ1)
-		strout << setiosflags(ios::left) << setw(4) << p->pid << "->";
+		strout << setiosflags(ios::left) << setw(5) << p->pid << "->";
 	else if(p->type == typ2)
-		strout << "<-" << setiosflags(ios::right) << setw(4) << p->pid;
+		strout << "<-" << setiosflags(ios::right) << setw(5) << p->pid;
 	strout << ']';
 	return strout.str();
+}
+
+string animateProcesses(Process p1, Process p2)
+{
+	if(p1 == NULL) return animateProcess(p2);
+	else if(p2 == NULL) return animateProcess(p1);
+	else
+	{
+		ostringstream strout(ostringstream::ate);
+		strout << '[';
+		strout << setiosflags(ios::left) << setw(3) << p1->pid;
+		strout << '|';
+		strout << setiosflags(ios::right) << setw(3) << p2->pid;
+		strout << ']';
+		return strout.str();
+	}
 }

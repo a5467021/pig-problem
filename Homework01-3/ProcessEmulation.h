@@ -32,3 +32,4 @@ int nextJiffle(vector<Process> &procs);
 
 string describeProcess(Process p);
 string animateProcess(Process p);
+string animateProcesses(Process p1, Process p2);
