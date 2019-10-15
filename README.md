@@ -8,14 +8,14 @@ The problem is described as:
 > Each pig operates in a separate thread, which executes the code below:
 
 > ```C
-typedef enum {EAST, WEST} Destination ;
-
-void pig(int id, Destination dest) {
-    WaitUntilSafeToCross(dest);
-    CrossRavine(id, dest);
-    DoneWithCrossing(dest);
-}
-```
+> typedef enum {EAST, WEST} Destination ;
+> 
+> void pig(int id, Destination dest) {
+>     WaitUntilSafeToCross(dest);
+>     CrossRavine(id, dest);
+>     DoneWithCrossing(dest);
+> }
+> ```
 
 > Variable id holds a unique number identifying that pig. CrossRavine(int pigid, Destination d) is a synchronous call provided to you, and it returns when the calling pig has safely reached its destination. Use semaphores to implement `WaitUntilSafeToCross(Destination d)` and `DoneWithCrossing(Destination d)`.
 
