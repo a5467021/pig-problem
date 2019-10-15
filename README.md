@@ -9,7 +9,7 @@ The problem is described as:
 
 > ```C
 typedef enum {EAST, WEST} Destination ;
-> 
+
 void pig(int id, Destination dest) {
     WaitUntilSafeToCross(dest);
     CrossRavine(id, dest);
