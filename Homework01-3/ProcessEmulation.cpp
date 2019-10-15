@@ -13,16 +13,16 @@ const int ERR_NO_JOBS = 2;
 
 const int execTime = 6;
 static int pidCount = 0;
-const ResourceSemaphore resThread = (ResourceSemaphore)malloc(sizeof(ResourceSemaphoreEntity));
+const ResourceSemaphore resProcess = (ResourceSemaphore)malloc(sizeof(ResourceSemaphoreEntity));
 const ResourceSemaphore resTime = (ResourceSemaphore)malloc(sizeof(ResourceSemaphoreEntity));
 
 void initResources()
 {
-	resThread->maximumCount = 5;
-	resThread->currentCount = 5;
-	resThread->minAllocCount = 1;
-	resThread->paramCount = 0;
-	resThread->exrtaParams = NULL;
+	resProcess->maximumCount = 5;
+	resProcess->currentCount = 5;
+	resProcess->minAllocCount = 1;
+	resProcess->paramCount = 0;
+	resProcess->exrtaParams = NULL;
 	resTime->maximumCount = 1;
 	resTime->currentCount = 1;
 	resTime->minAllocCount = 1;
@@ -125,7 +125,7 @@ int nextJiffle(vector<Process> &procs)
 			case ready:
 				if(acquireTime(resTime, 1) == SUCCESS)
 				{
-					if(acquireThread(resThread, 1) == SUCCESS)
+					if(acquireThread(resProcess, 1) == SUCCESS)
 					{
 						(*it)->status = executing;
 #ifdef LOGGING
@@ -160,7 +160,7 @@ int nextJiffle(vector<Process> &procs)
 		}
 	}
 
-	releaseThread(resThread, finishedJobs);
+	releaseThread(resProcess, finishedJobs);
 
 	// visualization
 	for(vector<Process>::iterator it = statusBar.begin(); it != statusBar.end(); ++it)
