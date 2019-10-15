@@ -31,3 +31,9 @@ iii) No pig should wait unnecessarily. (This way, you can maximize the throughpu
 > ii) At most N westward-moving students simultaneously execute `CrossRavine()`;  
 > iii) At most K students simultaneously execute `CrossRavine()`;  
 > iv) you solution should maximize the throughput under above conditions.
+
+Code in this repository is mainly implemented in C, together with some handy C++ features like `vector` and `queue`.
+
+As the teacher didn't provide us with the pre-implemented `CrossRavine()` at all, I decided to "translate" the problem into a more general producer-consumer model. Producers, which are the critical resources of the problem, are thread count, thread type (pig direction) and time (how many processes can be launched in an "atom time"). As required, the acquisition of these resources are implemented with semaphores, at least in my comprehension. Consumers are just the programs that are to be executed.
+
+The solution to the three questions are placed together in one Visual Studio solution and separated by different targets. By looking into different targets, you may see implementation for each question.
