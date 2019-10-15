@@ -11,7 +11,7 @@ Additionally, info 2 indicates that all process require a same critical resource
 
 Info 3 implies that the category of processes allowed to execute is also a critical resource, and I call it `type`.
 
-Therefore, I designed three *semaphores* in this problem, namingly `time`, `process` and `type`. The amount of `time` and type is set to 1 according to the situation as illustrated above, and the amount of `process` is determined by the situation. In this problem, it is 5. The mapping of variables in the description and my program can be listed as follows:
+Therefore, I designed three *semaphores* in this problem, namingly `time`, `process` and `type`. The amount of `time` and `type` is set to 1 according to the situation as illustrated above, and the amount of `process` is determined by the situation. In this problem, it is 5. The mapping of variables in the description and my program can be listed as follows:
 
 |in Problem Description|in My Program|
 |:--------------------:|:-----------:|
