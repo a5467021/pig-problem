@@ -3,6 +3,10 @@
 #include <malloc.h>
 #include <sstream>
 
+#ifdef _MSVC_LANG
+#include <windows.h>
+#endif
+
 #include "ProcessEmulation.h"
 
 using namespace std;
@@ -12,18 +16,31 @@ const int ERR_NO_RESOURCE = 1;
 const int ERR_NO_JOBS = 2;
 
 const int execTime = 6;
+const int K = 6, M = 3, N = 4;
 static int pidCount = 0;
 const ResourceSemaphore resProcess = (ResourceSemaphore)malloc(sizeof(ResourceSemaphoreEntity));
+const ResourceSemaphore resProcessTyp1= (ResourceSemaphore)malloc(sizeof(ResourceSemaphoreEntity));
+const ResourceSemaphore resProcessTyp2 = (ResourceSemaphore)malloc(sizeof(ResourceSemaphoreEntity));
 const ResourceSemaphore resTimeTyp1 = (ResourceSemaphore)malloc(sizeof(ResourceSemaphoreEntity));
 const ResourceSemaphore resTimeTyp2 = (ResourceSemaphore)malloc(sizeof(ResourceSemaphoreEntity));
 
 void initResources()
 {
-	resProcess->maximumCount = 5;
+	resProcess->maximumCount = K;
 	resProcess->currentCount = resProcess->maximumCount;
 	resProcess->minAllocCount = 1;
 	resProcess->paramCount = 0;
 	resProcess->exrtaParams = NULL;
+	resProcessTyp1->maximumCount = M;
+	resProcessTyp1->currentCount = resProcessTyp1->maximumCount;
+	resProcessTyp1->minAllocCount = 1;
+	resProcessTyp1->paramCount = 0;
+	resProcessTyp1->exrtaParams = NULL;
+	resProcessTyp2->maximumCount = N;
+	resProcessTyp2->currentCount = resProcessTyp2->maximumCount;
+	resProcessTyp2->minAllocCount = 1;
+	resProcessTyp2->paramCount = 0;
+	resProcessTyp2->exrtaParams = NULL;
 	resTimeTyp1->maximumCount = 1;
 	resTimeTyp1->currentCount = resTimeTyp1->maximumCount;
 	resTimeTyp1->minAllocCount = 1;
@@ -116,7 +133,7 @@ int nextJiffle(vector<Process> &procs)
 {
 	resetTime(resTimeTyp1);
 	resetTime(resTimeTyp2);
-	int finishedJobs = 0;
+	int finishedJobsTyp1 = 0, finishedJobsTyp2 = 0;
 
 	// collecting data for visualization
 	vector<Process> statusTyp1, statusTyp2;
@@ -131,34 +148,48 @@ int nextJiffle(vector<Process> &procs)
 				(*it)->status = ready;
 				break;
 			case ready:
-				if((*it)->type == typ1)
+				if(acquireThread(resProcess, 1) == SUCCESS)
 				{
-					if(acquireTime(resTimeTyp1, 1) == SUCCESS)
+					if((*it)->type == typ1)
 					{
-						if(acquireThread(resProcess, 1) == SUCCESS)
-							(*it)->status = executing;
+						if(acquireTime(resTimeTyp1, 1) == SUCCESS)
+						{
+							if(acquireThread(resProcessTyp1, 1) == SUCCESS)
+									(*it)->status = executing;
+							else
+							{
+								releaseTime(resTimeTyp1, 1);
+								releaseThread(resProcess, 1);
+								break;
+							}
+						}
 						else
 						{
-							releaseTime(resTimeTyp1, 1);
+							releaseThread(resProcess, 1);
 							break;
 						}
 					}
-					else break;
-				}
-				else if((*it)->type == typ2)
-				{
-					if(acquireTime(resTimeTyp2, 1) == SUCCESS)
+					else if((*it)->type == typ2)
 					{
-						if(acquireThread(resProcess, 1) == SUCCESS)
-							(*it)->status = executing;
+						if(acquireTime(resTimeTyp2, 1) == SUCCESS)
+						{
+							if(acquireThread(resProcessTyp2, 1) == SUCCESS)
+								(*it)->status = executing;
+							else
+							{
+								releaseTime(resTimeTyp2, 1);
+								releaseThread(resProcess, 1);
+								break;
+							}
+						}
 						else
 						{
-							releaseTime(resTimeTyp2, 1);
+							releaseThread(resProcess, 1);
 							break;
 						}
 					}
-					else break;
 				}
+				else break;
 #ifdef LOGGING
 						cout << "[LAUNCH] " << describeProcess(*it) << " launched" << endl;
 #endif
@@ -177,13 +208,19 @@ int nextJiffle(vector<Process> &procs)
 #ifdef LOGGING
 					cout << "[FINISH] " << describeProcess(*it) << " finished" << endl;
 #endif
-					++finishedJobs;
+					switch((*it)->type)
+					{
+						case typ1: ++finishedJobsTyp1; break;
+						case typ2: ++finishedJobsTyp2; break;
+					}
 				}
 				break;
 		}
 	}
 
-	releaseThread(resProcess, finishedJobs);
+	releaseThread(resProcessTyp1, finishedJobsTyp1);
+	releaseThread(resProcessTyp2, finishedJobsTyp2);
+	releaseThread(resProcess, finishedJobsTyp1 + finishedJobsTyp2);
 
 	// visualization
 	for(vector<Process>::iterator it1 = statusTyp1.begin(), it2 = statusTyp2.begin();
@@ -205,7 +242,7 @@ int nextJiffle(vector<Process> &procs)
 		}
 	}
 
-	return finishedJobs;
+	return finishedJobsTyp1 + finishedJobsTyp2;
 }
 
 string describeProcess(Process p)
