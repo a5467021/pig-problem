@@ -15,11 +15,11 @@ if(waiting_process.front().status != created
 {
     waiting_proces.pop();
     if(!waiting_proces.empty())
-        dispatch_process(waiting_process.front());
+        CrossRavine(waiting_process.front());	// dispatchProcess(...)
 }
 ```
 
-This will ensure that all processes will still be excuted as early as possible, but under a prime rule that all processes should be launched sequentially in general.
+This will ensure that all processes will still be excuted as early as possible, but under a prime rule that all processes should be launched sequentially in general. The rest of the program is inherited from solution of part A.
 
 Using the same seed as in part A, it looks like:
 

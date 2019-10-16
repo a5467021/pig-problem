@@ -40,6 +40,30 @@ typedef struct ResourceSemaphoreEntity {
 
 Where `maximumCount`, `currentCount` and `minAllocCount` are necessary properties of a semaphore. Semaphore manipulations are written as sepatared functions prefixed with `acquire`, `release` and so on.
 
+The general routine of execution is like this:
+
+```C
+void WaitUntilSafeToCross()
+{
+	waitDirection();	// acquireType()
+	waitWeight();		// acquireProcess()
+	waitEntry();		// acquireTime()
+}
+
+void CrassRavine()
+{
+	// just cross the ravine
+	...
+}
+
+void DoneWithCrossing()
+{
+	if(no_pigs_on_rope) signalDirection();	// releaseType()
+	signalWeight();							// releaseProcess()
+	signalEntry();							// releaseTime()
+}
+```
+
 The program automatically generates jobs with `rand()` function and any desired seed to simulate all possible situations. The output will show the current "running pigs" like this:
 
 ![](example-output.png)
